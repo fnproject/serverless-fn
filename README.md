@@ -19,4 +19,14 @@ The issue I see with this are the following:
 
 
 Should we move forward with mvp as described or should we do full on integration with serverless?
-If I move forward need to know how to handle the yaml differences as right now you need both a serverless.yml and a func.yaml which feels wiered and super clunky even for an mvp.
+
+
+If I move forward need to know how to handle the yaml differences as right now you need both a serverless.yml and a func.yaml which feels weird and super clunky even for an mvp.  
+
+
+After talking with travis it seems he thinks that we should go with mvp doing the proxying...
+
+Inorder to do that need to make a decision on these things:
+
+- Do we use our yaml files or a serverless yaml? (They will need a serverless yaml regardless so I think it should be serverless yaml)
+    - Assuming we use serverless yaml how do we get fn cli to work if there are no func yamls..
