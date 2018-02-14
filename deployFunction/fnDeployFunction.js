@@ -1,6 +1,7 @@
 'use strict';
 const FNDeploy = require('../deploy/fnDeploy');
 const CircularJSON = require('circular-json');
+const { spawnSync } = require('child_process');
 
 class FNDeployFunction extends FNDeploy {
   constructor(serverless, options) {
@@ -13,14 +14,15 @@ class FNDeployFunction extends FNDeploy {
   }
 
   deployFunction() {
-    var fun = this.serverless.providers.aws.options.f;
+    var fun = this.options.f;
     var serviceName = this.serverless.service.service;
     var dockerUser = this.serverless.service.provider["fn-user"];
-    if (this.serverless.service.functions[fun] !== undefined) {
-      console.log(fun);
+
+    var res = spawnSync('fn', ['deploy','--app',serviceName, '--registry', dockerUser,fun], {stdio: 'inherit'});
+    if (res.status > 0) {
+      process.exit(res.status)
     }
-    console.log(dockerUser+"/"+fun)
-    console.log(serviceName+"/"+fun)
+
   }
 }
 
