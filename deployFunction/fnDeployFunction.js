@@ -19,9 +19,6 @@ class FNDeployFunction extends FNDeploy {
     if (this.serverless.service.functions[fun] !== undefined) {
       console.log(fun);
     }
-    // console.log(CircularJSON.stringify(this.serverless.providers))
-    // console.log(CircularJSON.stringify(this.serverless.service.functions[fun]))
-    // console.log(CircularJSON.stringify(this.serverless.service.provider["fn-user"]))
     console.log(dockerUser+"/"+fun)
     console.log(serviceName+"/"+fun)
   }

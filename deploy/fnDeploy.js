@@ -17,8 +17,8 @@ class FNDeploy {
   deploy() {
       var dockerUser = this.serverless.service.provider["fn-user"];
       var service = this.serverless.service.service;
-      var res = spawnSync('fn', ['-v', 'deploy','--app',service, '--local', '--registry', dockerUser], {stdio: 'inherit'});
-
+      var res = spawnSync('fn', ['deploy','--app',service, '--registry', dockerUser,'--all'], {stdio: 'inherit'});
+      var res = 0
       if (res.status > 0) {
         process.exit(res.status)
       }
