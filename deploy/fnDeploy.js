@@ -14,8 +14,7 @@ class FNDeploy {
         this.provider = this.serverless.getProvider('fn');
 
         this.hooks = {
-            'deploy:deploy': () => BB.bind(this).then(this.deploy)
-            .then(console.log).catch(console.error),
+            'deploy:deploy': () => BB.bind(this).then(this.deploy),
         };
     }
 
@@ -57,7 +56,7 @@ class FNDeploy {
                 try {
                         // Each function should have dir. First change to it.
                     if (!fs.existsSync(dir)) {
-                        reject(`${dir}, does not exist`);
+                        reject(`function ${dir}, does not exist`);
                         return;
                     }
 
@@ -79,7 +78,7 @@ class FNDeploy {
 
                     // Maybe start convo about weather we should keep the docker
                     // file there or not. Since the lang helpers can change.
-                    this.deployFunc(func, appName, cwd, `${cwd}/${dir}`);
+                    this.deployFunc(func, appName, cwd, `${cwd}/${dir}`, reject);
 
                     funcFound = true;
                 } catch (err) {
@@ -113,12 +112,12 @@ class FNDeploy {
         }
     }
 
-    deployFunc(func, appName, baseDir, fdir) {
+    deployFunc(func, appName, baseDir, fdir, reject) {
         // XXX Get this from args... Figure out how to pass args
         const noCache = false;
         this.bumpIt(func);
 
-        this.buildFunc(func, fdir, noCache);
+        this.buildFunc(func, fdir, noCache, reject);
 
         // var apiInstance = new FN.AppsApi();
         // apiInstance.apiClient.basePath = 'http://127.0.0.1:8080/v1'.replace(/\/+$/, '');
@@ -147,13 +146,13 @@ class FNDeploy {
         // Add the rest of the logic to make sure version is not blank etc... Save.
     }
 
-    buildFunc(func, fdir, noCache) {
-        this.localBuild(fdir, func.build);
+    buildFunc(func, fdir, noCache, reject) {
+        this.localBuild(fdir, func.build, reject);
 
         // this.dockerBuild(fdir, func, noCache)
     }
 
-    localBuild(fdir, buildCmds) {
+    localBuild(fdir, buildCmds, reject) {
         console.log('Localbuild');
         console.log(fdir, buildCmds);
         if (buildCmds !== undefined && buildCmds !== null) {
@@ -161,7 +160,7 @@ class FNDeploy {
                 console.log(cmd);
                 const res = spawnSync('/bin/sh', ['-c', cmd], { stdio: 'inherit', cwd: fdir });
                 if (res.status > 0) {
-                    throw new Error(`Build step failed: ${res.status}`);
+                    reject(`${cmd} failed: ${res.status}`);
                 }
             });
         }
