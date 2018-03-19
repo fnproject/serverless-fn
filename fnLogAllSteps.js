@@ -1,5 +1,4 @@
 'use strict';
-const CircularJSON = require('circular-json');
 
 class FNLogAllSteps {
   constructor(serverless, options) {
