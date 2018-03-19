@@ -1,29 +1,26 @@
 'use strict';
 const FNDeploy = require('../deploy/fnDeploy');
-const CircularJSON = require('circular-json');
-const { spawnSync } = require('child_process');
+const BB = require('bluebird');
+// const FN = require('fn_js');
+// const { spawnSync } = require('child_process');
 
 class FNDeployFunction extends FNDeploy {
-  constructor(serverless, options) {
-    super(serverless, options)
-    this.serverless = serverless;
-    this.options = options || {};
-    this.hooks = {
-      'deploy:function:deploy': this.deployFunction.bind(this),
-    };
-  }
-
-  deployFunction() {
-    var fun = this.options.f;
-    var serviceName = this.serverless.service.service;
-    var dockerUser = this.serverless.service.provider["fn-user"];
-
-    var res = spawnSync('fn', ['deploy','--app',serviceName, '--registry', dockerUser,fun], {stdio: 'inherit'});
-    if (res.status > 0) {
-      process.exit(res.status)
+    constructor(serverless, options) {
+        super(serverless, options);
+        this.serverless = serverless;
+        this.options = options || {};
+        this.hooks = {
+            'deploy:function:deploy': () => BB.bind(this)
+            .then(this.deployFunction)
+            .then(console.log),
+        };
     }
 
-  }
+    deployFunction() {
+        const fun = this.options.f;
+        const serviceName = this.serverless.service.service;
+        const dockerUser = this.serverless.service.provider['fn-user'];
+    }
 }
 
 module.exports = FNDeployFunction;
