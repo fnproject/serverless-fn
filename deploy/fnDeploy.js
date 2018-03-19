@@ -119,6 +119,11 @@ class FNDeploy {
 
         this.buildFunc(func, fdir, noCache, reject);
 
+        // XXX add flag for local.. Figure out flags
+        if (true) { // local flag
+            this.dockerPush(func, reject);
+        }
+
         // var apiInstance = new FN.AppsApi();
         // apiInstance.apiClient.basePath = 'http://127.0.0.1:8080/v1'.replace(/\/+$/, '');
         //
@@ -131,7 +136,6 @@ class FNDeploy {
         //     // console.error(error.response.text);
         //     reject(error.response.text)
         // });
-        return;
     }
 
     bumpIt(func) {
@@ -149,7 +153,7 @@ class FNDeploy {
     buildFunc(func, fdir, noCache, reject) {
         this.localBuild(fdir, func.build, reject);
 
-        // this.dockerBuild(fdir, func, noCache)
+        this.dockerBuild(fdir, func, noCache, reject);
     }
 
     localBuild(fdir, buildCmds, reject) {
@@ -163,6 +167,50 @@ class FNDeploy {
                     reject(`${cmd} failed: ${res.status}`);
                 }
             });
+        }
+    }
+
+    dockerBuild(fdir, func, noCache, reject) {
+        // Check docker version
+        if (!fs.existsSync(`${fdir}/Dockerfile`)) {
+            reject(new Error(`cannot find ${fdir}/Dockerfile`));
+            // Lang helper stuff
+            return;
+        }
+
+        this.runDockerBuild(fdir, func, noCache, reject);
+
+        if (false && (helper !== undefined && helper !== null)) {
+            // post lang helper.
+            const err = helper.afterBuild();
+            if (err !== undefined) {
+                reject(err);
+            }
+        }
+    }
+
+    runDockerBuild(fdir, func, noCache, reject) {
+        const args = ['build', '-t', func.imageName, '-f', `${fdir}/Dockerfile`];
+        if (noCache) {
+            args.push('--no-cache');
+        }
+        args.push('--build-arg', 'HTTP_PROXY');
+        args.push('--build-arg', 'HTTPS_PROXY');
+        args.push(fdir);
+        console.log(args);
+        const res = spawnSync('docker', args, { stdio: 'inherit' });
+        if (res.status !== 0) {
+            console.log(res);
+            reject(new Error('docker command failed'));
+        }
+    }
+
+    dockerPush(func, reject) {
+        // XXX check valid image name..
+        this.serverless.log(`Pushing ${func.imageName} to docker registry....`);
+        const res = spawnSync('docker', ['push', func.imageName], { stdio: 'inherit' });
+        if (res.status !== 0) {
+            reject(new Error(`failed to push ${func.imageName}`));
         }
     }
 }
