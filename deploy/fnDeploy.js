@@ -88,7 +88,7 @@ class FNDeploy {
 
             func.dir = `${cwd}/${dir}`;
 
-            if (!(func.name != '')) {
+            if (!(func.name !== '')) {
                 func.name = dir;
             }
 
