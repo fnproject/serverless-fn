@@ -9,16 +9,18 @@ Come up with  ways to possibly unblock current blockers.
 
 Minimum features:
 
-- sls deploy (fn deploy)
-    - Need to add support for full config. (mem cpu etc..)
-    - Need to add deploy single func
-    - Need to add language helpers(Discuss how to do this)
+- [ ] sls deploy (fn deploy)
+    - [ ] Need to add support for full config. (mem cpu etc..)
+    - [ ] Need to add deploy single func
+    - [ ] Need to add language helpers(Discuss how to do this)
         - This means not just docker file. But making temp docker file etc..
-- sls package (fn build)
-    - Just build the docker images for each func.. Might mean refactoring sls deploy currently have.
-    - Could exclude not sure.
-- sls info (fn apps / routes this is for info about deployed service so maybe detect what svc / app and auto do inspect on that one.)
-    - Display info for the service/ app and all of its routes.
+- [ ] sls package (fn build)
+    - [ ] Just build the docker images for each func.. Might mean refactoring sls deploy currently have.
+    - [ ] Could exclude not sure.
+- [ ] sls info (fn apps / routes this is for info about deployed service so maybe detect what svc / app and auto do inspect on that one.)
+    - [ ] Display info for the service/ app and all of its routes.
+        - [ ] Display app
+        - [ ] Display routes
 
 Blockers:
 
