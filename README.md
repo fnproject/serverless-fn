@@ -1,32 +1,28 @@
-Start of MVP Serverless Integration for fn.
+MVP Serverless Integration for [FN](https://github.com/fnproject/fn).
 
-Initial MVP:
+- examples
+- how to install
+- how to use
 
-Use fn biniary and just exec out functionality from node sls cli.
+
+Come up with  ways to possibly unblock current blockers.
+
+Minimum features:
 
 - sls deploy (fn deploy)
+    - Need to add support for full config. (mem cpu etc..)
+    - Need to add deploy single func
+    - Need to add language helpers(Discuss how to do this)
+        - This means not just docker file. But making temp docker file etc..
 - sls package (fn build)
+    - Just build the docker images for each func.. Might mean refactoring sls deploy currently have.
+    - Could exclude not sure.
 - sls info (fn apps / routes this is for info about deployed service so maybe detect what svc / app and auto do inspect on that one.)
+    - Display info for the service/ app and all of its routes.
 
-Doing this will provide a small taste of FN through Serverless.
-The issue I see with this are the following:
+Blockers:
 
-- fn deploy also does fn build so sls deploy would call fn build and then fn deploy.. Might be a way for the package step to be skipped in serverless not sure.
-- User sees raw output of the fn deploy command which feels wierd and makes sls not really useful.
-- Makes it difficult to add in the different flags etc...
-- Not maintainable.
-- serverless uses a service.yml which has a different format than func.yaml and app.yaml.
-
-
-Should we move forward with mvp as described or should we do full on integration with serverless?
-
-
-If I move forward need to know how to handle the yaml differences as right now you need both a serverless.yml and a func.yaml which feels weird and super clunky even for an mvp.  
-
-
-After talking with travis it seems he thinks that we should go with mvp doing the proxying...
-
-Inorder to do that need to make a decision on these things:
-
-- Do we use our yaml files or a serverless yaml? (They will need a serverless yaml regardless so I think it should be serverless yaml)
-    - Assuming we use serverless yaml how do we get fn cli to work if there are no func yamls..
+- Yaml config supports comments in sls. Which means sls cannot write to yaml since parsers do not preserve commnets on write.
+    - Write custom parser that will preserve comments (No exp with this./ ++Time)
+    - Store version outside of the yaml and next to each func.(lang ext.)
+    - Use server to get curr version bump from there. If not on server use version in config.
