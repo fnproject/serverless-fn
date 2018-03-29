@@ -14,12 +14,58 @@ class FNDeploy {
         this.provider = this.serverless.getProvider('fn');
 
         this.hooks = {
-            'deploy:deploy': () => BB.bind(this).then(this.prepareFuncs)
+            'deploy:deploy': () => BB.bind(this)
+            .then(this.prepareFuncs)
             .mapSeries(this.deployFunc),
+            'deploy:function:deploy': () => BB.bind(this)
+            .then(this.prepareFunc)
+            .then(this.deployFunc),
         };
     }
 
+    error(data) {
+        console.log(data);
+    }
+
     prepareFuncs() {
+        const appName = this.serverless.service.serviceObject.name;
+        if (appName === '' || appName === undefined) {
+            BB.reject('No service name defined in serverless yaml.');
+        }
+        const svc = this.serverless.service.serviceObject;
+            // console.log(appName)
+            // console.log(svc)
+            // bump version // increase number seems easy enough...
+        const cwd = process.cwd();
+
+        const funcs = [];
+        _.each(this.serverless.service.functions, (func, dir) => {
+            func.appName = appName;
+            funcs.push({ func, dir, cwd, svc });
+        });
+        return funcs;
+    }
+
+    prepareFunc() {
+        const appName = this.serverless.service.serviceObject.name;
+        if (appName === '' || appName === undefined) {
+            BB.reject('No service name defined in serverless yaml.');
+        }
+        const svc = this.serverless.service.serviceObject;
+            // console.log(appName)
+            // console.log(svc)
+            // bump version // increase number seems easy enough...
+        const cwd = process.cwd();
+
+        const func = this.serverless.service.functions[this.options.f];
+        func.appName = appName;
+        const dir = this.options.f;
+
+        return BB.resolve({ func, dir, cwd, svc });
+    }
+
+
+    deployFunc(funcDir) {
         /*
             load app file  determine app name but also config --app
             flag... Not needed since need service.yaml
@@ -39,27 +85,6 @@ class FNDeploy {
         */
         // var dockerUser = this.serverless.service.provider['fn-user'];
 
-
-        const appName = this.serverless.service.serviceObject.name;
-        if (appName === '' || appName === undefined) {
-            BB.reject('No service name defined in serverless yaml.');
-        }
-        const svc = this.serverless.service.serviceObject;
-            // console.log(appName)
-            // console.log(svc)
-            // bump version // increase number seems easy enough...
-        const cwd = process.cwd();
-
-        const funcs = [];
-        _.each(this.serverless.service.functions, (func, dir) => {
-            func.appName = appName;
-            funcs.push({ func, dir, cwd, svc });
-        });
-        return funcs;
-    }
-
-
-    deployFunc(funcDir) {
         const { func,
              dir,
              cwd,
@@ -113,9 +138,7 @@ class FNDeploy {
         // return this.deployFuncWrapper(func, appName, cwd, `${cwd}/${dir}`);
 
 
-        return BB.mapSeries(steps, (s) => {
-            s(func);
-        });
+        return BB.mapSeries(steps, (s) => s(func));
 
         // Maybe start convo about weather we should keep the docker
         // file there or not. Since the lang helpers can change.
@@ -157,7 +180,6 @@ class FNDeploy {
 
         return BB.each(func.build, (cmd) => {
             const { dir } = func;
-            console.log(cmd);
             const res = spawnSync('/bin/sh', ['-c', cmd], { stdio: 'inherit', cwd: dir });
             if (res.status > 0) {
                 return BB.reject(`${cmd} failed: ${res.status}`);
@@ -206,6 +228,7 @@ class FNDeploy {
             image: func.imageName,
             config: func.config,
         };
+
 
         return apiInstance.appsAppRoutesRoutePut(appName, func.path, body);
     }
