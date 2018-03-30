@@ -10,8 +10,8 @@ Come up with  ways to possibly unblock current blockers.
 Minimum features:
 
 - [ ] sls deploy (fn deploy)
-    - [ ] Need to add support for full config. (mem cpu etc..)
-    - [ ] Need to add deploy single func
+    - [x] Need to add support for full config. (mem cpu etc..)
+    - [x] Need to add deploy single func
     - [ ] Need to add language helpers(Discuss how to do this)
         - This means not just docker file. But making temp docker file etc..
 - [ ] sls package (fn build)
