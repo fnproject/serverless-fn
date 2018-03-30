@@ -227,6 +227,13 @@ class FNDeploy {
         body.route = {
             image: func.imageName,
             config: func.config,
+            format: func.format,
+            timeout: func.timeout,
+            path: func.path,
+            type: func.type,
+            memory: func.memory,
+            idle_timeout: func.idletimeout,
+            headers: func.headers,
         };
 
 
