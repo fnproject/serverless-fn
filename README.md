@@ -17,10 +17,10 @@ Minimum features:
 - [ ] sls package (fn build)
     - [ ] Just build the docker images for each func.. Might mean refactoring sls deploy currently have.
     - [ ] Could exclude not sure.
-- [ ] sls info (fn apps / routes this is for info about deployed service so maybe detect what svc / app and auto do inspect on that one.)
-    - [ ] Display info for the service/ app and all of its routes.
-        - [ ] Display app
-        - [ ] Display routes
+- [x] sls info (fn apps / routes this is for info about deployed service so maybe detect what svc / app and auto do inspect on that one.)
+    - [x] Display info for the service/ app and all of its routes.
+        - [x] Display app
+        - [x] Display routes
 
 Blockers:
 
