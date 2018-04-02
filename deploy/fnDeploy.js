@@ -30,7 +30,7 @@ class FNDeploy {
     prepareFuncs() {
         const appName = this.serverless.service.serviceObject.name;
         if (appName === '' || appName === undefined) {
-            BB.reject('No service name defined in serverless yaml.');
+            return BB.reject('No service name defined in serverless yaml.');
         }
         const svc = this.serverless.service.serviceObject;
             // console.log(appName)
@@ -49,7 +49,7 @@ class FNDeploy {
     prepareFunc() {
         const appName = this.serverless.service.serviceObject.name;
         if (appName === '' || appName === undefined) {
-            BB.reject('No service name defined in serverless yaml.');
+            return BB.reject('No service name defined in serverless yaml.');
         }
         const svc = this.serverless.service.serviceObject;
             // console.log(appName)
