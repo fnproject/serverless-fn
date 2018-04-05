@@ -4,6 +4,9 @@
 class LangHelper {
     // Handles return whether it can handle the passed in lang string or not
     handles(lang) { // lang normally tanks a language to use to determine if it can handle it.
+        if (lang === '') {
+            return false;
+        }
         for (const l of this.langStrings()) {
             if (lang === l) {
                 return true;
