@@ -1,30 +1,37 @@
 MVP Serverless Integration for [FN](https://github.com/fnproject/fn).
 
-- examples
-- how to install
-- how to use
+- [ ] examples
+- [ ] how to install
+- [ ] how to use
 
 
 Come up with  ways to possibly unblock current blockers.
 
 Minimum features:
 
-- [ ] sls deploy (fn deploy)
-    - [x] Need to add support for full config. (mem cpu etc..)
-    - [x] Need to add deploy single func
-    - [ ] Need to add language helpers(Discuss how to do this)
-        - This means not just docker file. But making temp docker file etc..
-- [ ] sls package (fn build)
-    - [ ] Just build the docker images for each func.. Might mean refactoring sls deploy currently have.
-    - [ ] Could exclude not sure.
-- [x] sls info (fn apps / routes this is for info about deployed service so maybe detect what svc / app and auto do inspect on that one.)
-    - [x] Display info for the service/ app and all of its routes.
-        - [x] Display app
-        - [x] Display routes
+- [ ] sls
 
-Blockers:
+- [ ] Kubeless Commands + invoke local (sls commands)
+    - [ ] create
+        - [ ] create a new service in the dir from the template.
+    - [ ] deploy (fn deploy)
+        - [ ] Handle version (Just use one from server and bump if there. Else bump from whats in yaml.)
+        - [x] Deploy all of service using deploy
+        - [x] Need to add support for full config. (mem cpu etc..)
+        - [x] Need to add deploy single func
+        - [x] Deploy just a function
+        - [x] Dockerfile
+        - [ ] Language Specific
+            - [ ] Helpers
+            - [ ] Helper plugin points
+    - [ ] invoke (Call the function that is deployed.)
+        - [ ] local (Call the function locally with a container etc / build and then run.)
+    - [ ] logs (Get the logs for a function in the service)
+    - [ ] info (fn apps / routes this is for info about deployed service so maybe detect what svc / app and auto do inspect on that one.)
+        - [x] Display info for the service/ app and all of its routes.
+            - [x] Display app
+            - [x] Display routes
+    - [ ] remove (Remove the service from FN)
+        - [ ] remove function (Just remove a function.)
 
-- Yaml config supports comments in sls. Which means sls cannot write to yaml since parsers do not preserve commnets on write.
-    - Write custom parser that will preserve comments (No exp with this./ ++Time)
-    - Store version outside of the yaml and next to each func.(lang ext.)
-    - Use server to get curr version bump from there. If not on server use version in config.
+- [ ] April 17th demo serverless.
