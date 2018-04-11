@@ -6,13 +6,27 @@ const util = require('util');
 const semver = require('semver');
 const _ = require('lodash');
 const fs = require('fs');
+const getHelper = require('../langs/helpers.js');
 
 class FNDeploy {
     constructor(serverless, options) {
         this.serverless = serverless;
         this.options = options || {};
         this.provider = this.serverless.getProvider('fn');
-
+        this.commands = {
+            deploy: {
+                usage: 'Deploys your fn service.',
+                lifecycleEvents: [
+                    'deploy:deploy',
+                ],
+                options: {
+                    local: {
+                        usage: 'Deploy locally(no docker push)',
+                        shortcut: 'l',
+                    },
+                },
+            },
+        };
         this.hooks = {
             'deploy:deploy': () => BB.bind(this)
             .then(this.prepareFuncs)
@@ -41,7 +55,8 @@ class FNDeploy {
         const funcs = [];
         _.each(this.serverless.service.functions, (func, dir) => {
             func.appName = appName;
-            funcs.push({ func, dir, cwd, svc });
+            const funcDir = { func, dir, cwd, svc };
+            funcs.push(funcDir);
         });
         return funcs;
     }
@@ -92,24 +107,31 @@ class FNDeploy {
          // XXX local flag
          // XXX noCache flag
 
+        if (this.options.local) {
+            func.local = true;
+        }
+
+        if (this.options.noCache) {
+            func.noCache = true;
+        }
+
         const steps = [
             this.bumpIt,
             this.localCmd,
-            this.dockerBuild,
+            this.buildHelper.bind(this),
             this.dockerPush,
             this.routeUpdate,
         ];
 
-        // try {
-            // Each function should have dir. First change to it.
-        if (!fs.existsSync(dir)) {
+        if (!fs.existsSync(`${cwd}/${dir}`)) {
+            console.log(`${cwd}/${dir}`);
             return BB.reject(`function ${dir}, does not exist`);
         }
 
         this.mergeConfigs(svc, func);
 
         if (dir !== cwd) {
-            process.chdir(dir);
+            process.chdir(`${cwd}/${dir}`);
 
             func.dir = `${cwd}/${dir}`;
 
@@ -122,16 +144,7 @@ class FNDeploy {
             }
         }
 
-        if (!fs.existsSync('Dockerfile')) {
-            // XXX logic for no Dockerfile in the func folder.
-            // XXX add the pre build and after build to steps list if there is nod docker file.
-            // Lang helper stuff
-            // if (false && (helper !== undefined && helper !== null)) {
-                // post lang helper.
-                // return db.then(() => { helper.afterBuild; });
-            // }
-            return BB.reject(`cannot find Dockerfile: ${func.name}`);
-        }
+        func.imageName = this.imageName(func);
 
         // Root func. Cant happen right now. Need special logic.
         // Figure out this...
@@ -139,13 +152,6 @@ class FNDeploy {
 
 
         return BB.mapSeries(steps, (s) => s(func));
-
-        // Maybe start convo about weather we should keep the docker
-        // file there or not. Since the lang helpers can change.
-
-        // } catch (err) {
-        //     fail(err);
-        // }
     }
 
     mergeConfigs(svc, func) {
@@ -188,8 +194,140 @@ class FNDeploy {
         });
     }
 
+    buildHelper(func) {
+        // Check for docker file.
+        if (fs.existsSync('Dockerfile')) {
+            const cwd = process.cwd();
+            func.dockerFile = `${cwd}/Dockerfile`;
+            return this.dockerBuild(func);
+        }
+
+
+        if (func.runtime === 'docker') {
+            return BB.reject('Docker file missing for "docker" runtime');
+        }
+        if (func.runtime === null || func.runtime === undefined) {
+            return BB.reject('Runtime not detected');
+        }
+
+        const helper = getHelper(func.runtime);
+        if (helper === undefined) {
+            return BB.reject(`Unable to find runtime helper for ${func.runtime}`);
+        }
+
+        func.helper = helper;
+        func.dockerFile = this.writeTmpDockerFile(func);
+        const steps = [
+            this.preBuild,
+            this.dockerBuild,
+            this.postBuild,
+        ];
+        return BB.mapSeries(steps, (s) => { s(func); })
+            .finally(this.cleanup(func.dockerFile));
+    }
+
+    imageName(func) {
+        let fname = func.name;
+        if (!fname.includes('/')) {
+		// then we'll prefix FN_REGISTRY
+            let reg = process.env.FN_REGISTRY;
+            if (reg !== '') {
+                if (!reg.endsWith('/')) {
+                    reg += '/';
+                }
+                fname = `${reg}${fname}`;
+            }
+        }
+        if (func.version !== undefined) {
+            fname = `${fname}:${func.version}`;
+        }
+        return fname;
+    }
+
+
+    writeTmpDockerFile(func) {
+        const helper = func.helper;
+        if (func.entrypoint === undefined && func.cmd === undefined) {
+            return BB.reject('entrypoint and cmd are missing, you must provide one or the other');
+        }
+        const cwd = process.cwd();
+        const dockerFile = `${cwd}/tempDockerFile`;
+        let dockerFileLines = [];
+
+       // multi-stage build: https://medium.com/travis-on-docker/multi-stage-docker-builds-for-creating-tiny-go-images-e0e1867efe5a
+        let bi = func.buildImage;
+        if (bi === undefined) {
+            bi = helper.buildFromImage();
+        }
+
+        if (helper.isMultiStage()) {
+        // build stage
+            dockerFileLines.push(`FROM ${bi} as build-stage`);
+        } else {
+            dockerFileLines.push(`FROM ${bi}`);
+        }
+        dockerFileLines.push('WORKDIR /function');
+        dockerFileLines = dockerFileLines.concat(helper.dockerfileBuildCmds());
+
+        if (helper.isMultiStage()) {
+		// final stage
+            let ri = func.runImage;
+            if (ri === undefined) {
+                ri = helper.runFromImage();
+            }
+            dockerFileLines.push(`FROM ${ri}`);
+            dockerFileLines.push('WORKDIR /function');
+            dockerFileLines = dockerFileLines.concat(helper.dockerfileCopyCmds());
+        }
+
+        if (func.entrypoint !== '') {
+            const entry = this.stringToSlice(func.entrypoint);
+            dockerFileLines.push(`ENTRYPOINT [${entry}]`);
+        }
+
+        if (func.cmd !== undefined) {
+            const cmd = this.stringToSlice(func.cmd);
+            dockerFileLines.push(`CMD [${cmd}]`);
+        }
+
+        fs.writeFileSync(dockerFile, dockerFileLines.join('\n'));
+
+        return dockerFile;
+    }
+
+    stringToSlice(val) {
+        const vals = val.split(/(\s+)/).filter((e) => e.trim().length > 0);
+        vals.forEach((v, i) => {
+            vals[i] = `"${v.trim()}"`;
+        });
+
+        return vals.join(', ');
+    }
+
+    preBuild(func) {
+        if (func.helper.hasPreBuild()) {
+            func.helper.preBuild();
+        }
+        return BB.resolve(func);
+    }
+
+    postBuild(func) {
+        func.helper.afterBuild();
+        return BB.resolve(func);
+    }
+
+    cleanup(dockerFile) {
+        return () => {
+            if (dockerFile !== 'Dockerfile'
+            && dockerFile !== undefined
+            && dockerFile !== null) {
+                fs.unlinkSync(dockerFile);
+            }
+        };
+    }
+
     dockerBuild(func) {
-        const args = ['build', '-t', func.imageName, '-f', `${func.dir}/Dockerfile`];
+        const args = ['build', '-t', func.imageName, '-f', func.dockerFile];
         if (func.noCache) {
             args.push('--no-cache');
         }
@@ -229,7 +367,6 @@ class FNDeploy {
             config: func.config,
             format: func.format,
             timeout: func.timeout,
-            path: func.path,
             type: func.type,
             memory: func.memory,
             idle_timeout: func.idletimeout,
