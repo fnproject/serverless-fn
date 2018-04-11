@@ -24,6 +24,9 @@ class FNDeploy {
                         usage: 'Deploy locally(no docker push)',
                         shortcut: 'l',
                     },
+                    'no-cache': {
+                        usage: "Don't use docker cache",
+                    },
                 },
             },
         };
@@ -124,7 +127,6 @@ class FNDeploy {
         ];
 
         if (!fs.existsSync(`${cwd}/${dir}`)) {
-            console.log(`${cwd}/${dir}`);
             return BB.reject(`function ${dir}, does not exist`);
         }
 
@@ -334,10 +336,8 @@ class FNDeploy {
         args.push('--build-arg', 'HTTP_PROXY');
         args.push('--build-arg', 'HTTPS_PROXY');
         args.push(func.dir);
-        console.log(args);
         const res = spawnSync('docker', args, { stdio: 'inherit' });
         if (res.status !== 0) {
-            console.log(res);
             return BB.reject('docker command failed');
         }
         return BB.resolve('image built successfully');
