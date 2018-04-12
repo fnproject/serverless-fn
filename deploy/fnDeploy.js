@@ -249,9 +249,11 @@ class FNDeploy {
 
     writeTmpDockerFile(func) {
         const helper = func.helper;
-        if (func.entrypoint === undefined && func.cmd === undefined) {
-            return BB.reject('entrypoint and cmd are missing, you must provide one or the other');
-        }
+        // Patched to add entrypoint from language helper.
+        // if (func.entrypoint === undefined && func.cmd === undefined) {
+        //     return BB.reject('entrypoint and cmd are missing, you must provide one or the other');
+        // }
+
         const cwd = process.cwd();
         const dockerFile = `${cwd}/tempDockerFile`;
         let dockerFileLines = [];
@@ -282,14 +284,23 @@ class FNDeploy {
             dockerFileLines = dockerFileLines.concat(helper.dockerfileCopyCmds());
         }
 
-        if (func.entrypoint !== '') {
+        let addedEntry = false;
+        if (func.entrypoint !== undefined) {
             const entry = this.stringToSlice(func.entrypoint);
             dockerFileLines.push(`ENTRYPOINT [${entry}]`);
+            addedEntry = true;
         }
 
         if (func.cmd !== undefined) {
             const cmd = this.stringToSlice(func.cmd);
             dockerFileLines.push(`CMD [${cmd}]`);
+            addedEntry = true;
+        }
+
+        console.log('Added Entry:', addedEntry);
+        if (!addedEntry) {
+            const entry = this.stringToSlice(helper.entrypoint());
+            dockerFileLines.push(`ENTRYPOINT [${entry}]`);
         }
 
         fs.writeFileSync(dockerFile, dockerFileLines.join('\n'));
