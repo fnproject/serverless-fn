@@ -31,7 +31,6 @@ Minimum features:
         - [x] Display info for the service/ app and all of its routes.
             - [x] Display app
             - [x] Display routes
-    - [ ] remove (Remove the service from FN)
-        - [ ] remove function (Just remove a function.)
+    - [x] remove (Remove the service from FN)
 
 - [ ] April 17th demo serverless.
