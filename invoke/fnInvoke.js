@@ -1,6 +1,8 @@
 'use strict';
 
-const { fnApiUrl } = require('../utils/util');
+const { fnRouteUrl } = require('../utils/util');
+const axios = require('axios');
+const BB = require('bluebird');
 
 class FNInvoke {
     constructor(serverless, options) {
@@ -9,16 +11,21 @@ class FNInvoke {
         this.provider = this.serverless.getProvider('fn');
 
         this.hooks = {
-            'invoke:invoke': this.invokeFunction.bind(this),
+            'invoke:invoke': () => BB.bind(this)
+                .then(this.invokeFunction)
+                .then((data) => data.data)
+                .then(console.log)
+                .catch(console.log),
         };
     }
 
     invokeFunction() {
-        console.log(this.options.f, this.serverless.service.functions[this.options.f]);
-        console.log(this.options.data);
-        console.log(fnApiUrl());
-
-        this.serverless.cli.log('I am invoking a functions');
+        const f = this.serverless.service.functions[this.options.f];
+        if (f === undefined || f === null) {
+            return BB.reject(`${this.options.f} is not a valid function for this service.`);
+        }
+        const url = fnRouteUrl();
+        return axios.get(`${url}${this.serverless.service.serviceObject.name}/${f.path}`);
     }
 }
 

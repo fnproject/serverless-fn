@@ -22,6 +22,7 @@
   },
   "homepage": "https://github.com/fnproject/serverless-integration#readme",
   "dependencies": {
+    "axios": "^0.18.0",
     "bluebird": "^3.5.1",
     "chalk": "^2.0.1",
     "fn_js": "github:hibooboo2/fn_js",
