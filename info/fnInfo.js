@@ -1,6 +1,8 @@
 'use strict';
 const FnJs = require('fn_js');
 const BB = require('bluebird');
+const { fnApiUrl } = require('../utils/util');
+
 
 class FNInfo {
     constructor(serverless, options) {
@@ -49,7 +51,7 @@ class FNInfo {
     getApp() {
         this.serverless.cli.log('Here is the info for the function');
         const apiInstance = new FnJs.AppsApi();
-        apiInstance.apiClient.basePath = 'http://127.0.0.1:8080/v1'.replace(/\/+$/, '');
+        apiInstance.apiClient.basePath = fnApiUrl();
 
         const appName = this.serverless.service.serviceObject.name;
         if (appName === '' || appName === undefined) {
@@ -65,7 +67,7 @@ class FNInfo {
             return BB.reject('No service provided');
         }
         const apiInstance = new FnJs.RoutesApi();
-        apiInstance.apiClient.basePath = 'http://127.0.0.1:8080/v1'.replace(/\/+$/, '');
+        apiInstance.apiClient.basePath = fnApiUrl();
         return apiInstance.appsAppRoutesGet(app).then((funcs) => funcs.routes);
     }
 

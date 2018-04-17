@@ -26,7 +26,7 @@ Minimum features:
             - [x] Helper plugin points
     - [ ] invoke (Call the function that is deployed.)
         - [ ] local (Call the function locally with a container etc / build and then run.)
-    - [ ] logs (Get the logs for a function in the service)
+    - [x] logs (Get the logs for a function in the service)
     - [x] info (fn apps / routes this is for info about deployed service so maybe detect what svc / app and auto do inspect on that one.)
         - [x] Display info for the service/ app and all of its routes.
             - [x] Display app

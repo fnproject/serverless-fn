@@ -1,5 +1,7 @@
 'use strict';
 
+const { fnApiUrl } = require('../utils/util');
+
 class FNInvoke {
     constructor(serverless, options) {
         this.serverless = serverless;
@@ -11,8 +13,11 @@ class FNInvoke {
         };
     }
 
-    invokeFunction(func, data) {
-        console.log(func, data);
+    invokeFunction() {
+        console.log(this.options.f, this.serverless.service.functions[this.options.f]);
+        console.log(this.options.data);
+        console.log(fnApiUrl());
+
         this.serverless.cli.log('I am invoking a functions');
     }
 }

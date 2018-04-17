@@ -7,6 +7,7 @@ const semver = require('semver');
 const _ = require('lodash');
 const fs = require('fs');
 const getHelper = require('../langs/helpers.js');
+const { fnApiUrl } = require('../utils/util');
 
 class FNDeploy {
     constructor(serverless, options) {
@@ -370,7 +371,7 @@ class FNDeploy {
     routeUpdate(func) {
         const { appName } = func;
         const apiInstance = new FN.RoutesApi();
-        apiInstance.apiClient.basePath = 'http://127.0.0.1:8080/v1'.replace(/\/+$/, '');
+        apiInstance.apiClient.basePath = fnApiUrl();
 
         const body = new FN.RouteWrapper(); // RouteWrapper | One route to post.
         body.route = {

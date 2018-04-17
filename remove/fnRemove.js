@@ -1,6 +1,7 @@
 'use strict';
 const BB = require('bluebird');
 const FN = require('fn_js');
+const { fnApiUrl } = require('../utils/util');
 
 class FNRemove {
     constructor(serverless, options) {
@@ -17,7 +18,7 @@ class FNRemove {
 
     removeFunction() {
         const apiInstance = new FN.AppsApi();
-        apiInstance.apiClient.basePath = 'http://127.0.0.1:8080/v1'.replace(/\/+$/, '');
+        apiInstance.apiClient.basePath = fnApiUrl();
         const app = this.serverless.service.serviceObject.name;
 
         return apiInstance.appsAppDelete(app);
