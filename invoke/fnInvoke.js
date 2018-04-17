@@ -14,8 +14,7 @@ class FNInvoke {
             'invoke:invoke': () => BB.bind(this)
                 .then(this.invokeFunction)
                 .then((data) => data.data)
-                .then(console.log)
-                .catch(console.log),
+                .then(console.log),
         };
     }
 
@@ -25,7 +24,15 @@ class FNInvoke {
             return BB.reject(`${this.options.f} is not a valid function for this service.`);
         }
         const url = fnRouteUrl();
-        return axios.get(`${url}${this.serverless.service.serviceObject.name}/${f.path}`);
+        let funcpath = f.path;
+        if (funcpath === undefined) {
+            funcpath = f.name;
+        }
+        if (this.options.data !== undefined) {
+            return axios.post(`${url}${this.serverless.service.serviceObject.name}/${funcpath}`
+                , this.options.data);
+        }
+        return axios.get(`${url}${this.serverless.service.serviceObject.name}/${funcpath}`);
     }
 }
 
