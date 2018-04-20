@@ -23,16 +23,16 @@ class FNInvoke {
         if (f === undefined || f === null) {
             return BB.reject(`${this.options.f} is not a valid function for this service.`);
         }
-        const url = fnRouteUrl();
+        let url = fnRouteUrl();
         let funcpath = f.path;
         if (funcpath === undefined) {
             funcpath = f.name;
         }
+        url = `${url}/${this.serverless.service.serviceObject.name}/${funcpath}`;
         if (this.options.data !== undefined) {
-            return axios.post(`${url}${this.serverless.service.serviceObject.name}/${funcpath}`
-                , this.options.data);
+            return axios.post(url, this.options.data);
         }
-        return axios.get(`${url}${this.serverless.service.serviceObject.name}/${funcpath}`);
+        return axios.get(url);
     }
 }
 

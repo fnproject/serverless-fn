@@ -12,8 +12,8 @@ Minimum features:
 - [ ] sls
 
 - [ ] Kubeless Commands + invoke local (sls commands)
-    - [ ] create
-        - [ ] create a new service in the dir from the template.
+    - [x] create
+        - [x] create a new service in the dir from the template.
     - [ ] deploy (fn deploy)
         - [ ] Handle version (Just use one from server and bump if there. Else bump from whats in yaml.)
         - [x] Deploy all of service using deploy
@@ -24,7 +24,7 @@ Minimum features:
         - [x] Language Specific
             - [x] Helpers
             - [x] Helper plugin points
-    - [ ] invoke (Call the function that is deployed.)
+    - [x] invoke (Call the function that is deployed.)
         - [ ] local (Call the function locally with a container etc / build and then run.)
     - [x] logs (Get the logs for a function in the service)
     - [x] info (fn apps / routes this is for info about deployed service so maybe detect what svc / app and auto do inspect on that one.)
