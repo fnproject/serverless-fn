@@ -250,10 +250,6 @@ class FNDeploy {
 
     writeTmpDockerFile(func) {
         const helper = func.helper;
-        // Patched to add entrypoint from language helper.
-        // if (func.entrypoint === undefined && func.cmd === undefined) {
-        //     return BB.reject('entrypoint and cmd are missing, you must provide one or the other');
-        // }
 
         const cwd = process.cwd();
         const dockerFile = `${cwd}/tempDockerFile`;

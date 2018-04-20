@@ -32,5 +32,3 @@ Minimum features:
             - [x] Display app
             - [x] Display routes
     - [x] remove (Remove the service from FN)
-
-- [ ] April 17th demo serverless.
