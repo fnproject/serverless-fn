@@ -49,7 +49,6 @@ class FNInfo {
     }
 
     getApp() {
-        this.serverless.cli.log('Here is the info for the function');
         const apiInstance = new FnJs.AppsApi();
         apiInstance.apiClient.basePath = fnApiUrl();
 
