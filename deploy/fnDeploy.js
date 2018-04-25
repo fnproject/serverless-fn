@@ -108,8 +108,6 @@ class FNDeploy {
              dir,
              cwd,
              svc } = funcDir;
-         // XXX local flag
-         // XXX noCache flag
 
         if (this.options.local) {
             func.local = true;
