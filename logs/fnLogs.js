@@ -1,6 +1,7 @@
 'use strict';
 const BB = require('bluebird');
 const FN = require('fn_js');
+const { fnApiUrl } = require('../utils/util');
 
 class FNLogs {
     constructor(serverless, options) {
@@ -31,7 +32,7 @@ class FNLogs {
 
     getLog(call) {
         const apiInstance = new FN.LogApi();
-        apiInstance.apiClient.basePath = 'http://127.0.0.1:8080/v1'.replace(/\/+$/, '');
+        apiInstance.apiClient.basePath = fnApiUrl();
 
         const app = this.serverless.service.serviceObject.name;
         return apiInstance.appsAppCallsCallLogGet(app, call.id).then((log) => log.log);
@@ -39,7 +40,7 @@ class FNLogs {
 
     getCalls() {
         const apiInstance = new FN.CallApi();
-        apiInstance.apiClient.basePath = 'http://127.0.0.1:8080/v1'.replace(/\/+$/, '');
+        apiInstance.apiClient.basePath = fnApiUrl();
 
         const app = this.serverless.service.serviceObject.name;
         const func = this.serverless.service.functions[this.options.f];

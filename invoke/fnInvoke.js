@@ -3,6 +3,8 @@
 const { fnRouteUrl } = require('../utils/util');
 const axios = require('axios');
 const BB = require('bluebird');
+const fs = require('fs');
+const FnLogs = require('../logs/fnLogs');
 
 class FNInvoke {
     constructor(serverless, options) {
@@ -13,9 +15,22 @@ class FNInvoke {
         this.hooks = {
             'invoke:invoke': () => BB.bind(this)
                 .then(this.invokeFunction)
-                .then((data) => data.data)
-                .then(console.log),
+                .then(this.log),
         };
+    }
+
+    log(data) {
+        console.log(data.data);
+
+        if (this.options.log) {
+            const logs = new FnLogs(this.serverless, this.options);
+            const call = {};
+            call.id = data.headers.fn_call_id;
+            return logs.getLog(call)
+                .then((log) => console.log(log.log))
+                .then(() => data.data);
+        }
+        return data.data;
     }
 
     invokeFunction() {
@@ -29,6 +44,10 @@ class FNInvoke {
             funcpath = f.name;
         }
         url = `${url}/${this.serverless.service.serviceObject.name}/${funcpath}`;
+        if (this.options.path !== undefined) {
+            const cwd = process.cwd();
+            return axios.post(url, fs.readFileSync(`${cwd}/${this.options.path}`));
+        }
         if (this.options.data !== undefined) {
             return axios.post(url, this.options.data);
         }
