@@ -21,7 +21,6 @@ class FNInvoke {
 
     log(data) {
         console.log(data.data);
-
         if (this.options.log) {
             const logs = new FnLogs(this.serverless, this.options);
             const call = {};
@@ -34,24 +33,57 @@ class FNInvoke {
     }
 
     invokeFunction() {
-        const f = this.serverless.service.functions[this.options.f];
+        let funParam = this.options.function;
+        if (funParam === undefined) {
+            funParam = this.options.f;
+        }
+        if (funParam === undefined || funParam === null || funParam === '') {
+            return BB.reject('No valid function provided please provide' +
+                ' --function or -f to invoke.');
+        }
+
+        let f = this.serverless.service.functions[funParam];
         if (f === undefined || f === null) {
-            return BB.reject(`${this.options.f} is not a valid function for this service.`);
+            for (const func in this.serverless.service.functions) {
+                const path = this.getFuncPath(this.serverless.service.functions[func], func);
+                if (path.replace('/', '') === funParam.replace('/', '')) {
+                    f = this.serverless.service.functions[func];
+                    break;
+                }
+            }
+
+            if (f === undefined || f === null) {
+                return BB.reject(`${this.options.f} is not a valid function for this service.`);
+            }
         }
         let url = fnRouteUrl();
-        let funcpath = f.path;
-        if (funcpath === undefined) {
-            funcpath = f.name;
-        }
+        const funcpath = this.getFuncPath(f);
+
         url = `${url}/${this.serverless.service.serviceObject.name}/${funcpath}`;
+        this.serverless.cli.log(`Calling Function: ${url}`);
         if (this.options.path !== undefined) {
             const cwd = process.cwd();
             return axios.post(url, fs.readFileSync(`${cwd}/${this.options.path}`));
         }
+
         if (this.options.data !== undefined) {
             return axios.post(url, this.options.data);
         }
         return axios.get(url);
+    }
+
+    getFuncPath(func, dir) {
+        let path = dir;
+        for (let evt = 0; evt < func.events.length; evt++) {
+            if (func.events[evt].http !== undefined) {
+                path = func.events[evt].http.path;
+            }
+        }
+        if (path === undefined || path === null || path === '') {
+            path = func.name;
+        }
+
+        return path;
     }
 }
 
