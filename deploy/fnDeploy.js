@@ -7,7 +7,7 @@ const semver = require('semver');
 const _ = require('lodash');
 const fs = require('fs');
 const getHelper = require('../langs/helpers.js');
-const { fnApiUrl, getFuncPath } = require('../utils/util');
+const { fnApiUrl, getFuncPath, getFunc } = require('../utils/util');
 
 class FNDeploy {
     constructor(serverless, options) {
@@ -76,8 +76,14 @@ class FNDeploy {
             // bump version // increase number seems easy enough...
         const cwd = process.cwd();
 
-        const func = this.serverless.service.functions[this.options.f];
+        let funParam = this.options.function;
+        if (funParam === undefined) {
+            funParam = this.options.f;
+        }
+
+        const func = getFunc(funParam, this.serverless.service.functions);
         func.appName = appName;
+
         const dir = this.options.f;
 
         return BB.resolve({ func, dir, cwd, svc });

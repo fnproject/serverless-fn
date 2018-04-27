@@ -1,6 +1,6 @@
 'use strict';
 
-const { fnRouteUrl, getFuncPath } = require('../utils/util');
+const { fnRouteUrl, getFuncPath, getFunc } = require('../utils/util');
 const axios = require('axios');
 const BB = require('bluebird');
 const fs = require('fs');
@@ -42,19 +42,9 @@ class FNInvoke {
                 ' --function or -f to invoke.');
         }
 
-        let f = this.serverless.service.functions[funParam];
+        const f = getFunc(funParam, this.serverless.service.functions);
         if (f === undefined || f === null) {
-            for (const func in this.serverless.service.functions) {
-                const path = getFuncPath(this.serverless.service.functions[func], func);
-                if (path.replace('/', '') === funParam.replace('/', '')) {
-                    f = this.serverless.service.functions[func];
-                    break;
-                }
-            }
-
-            if (f === undefined || f === null) {
-                return BB.reject(`${this.options.f} is not a valid function for this service.`);
-            }
+            return BB.reject(`${this.options.f} is not a valid function for this service.`);
         }
         let url = fnRouteUrl();
         const funcpath = getFuncPath(f);

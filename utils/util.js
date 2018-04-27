@@ -29,3 +29,17 @@ module.exports.getFuncPath = function (func, dir) {
 
     return path;
 };
+
+module.exports.getFunc = function (funParam, functions) {
+    let f = functions[funParam];
+    if (f === undefined || f === null) {
+        for (const func in functions) {
+            const path = module.exports.getFuncPath(functions[func], func);
+            if (path.replace('/', '') === funParam.replace('/', '')) {
+                f = functions[func];
+                break;
+            }
+        }
+    }
+    return f;
+};
