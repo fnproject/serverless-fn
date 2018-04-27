@@ -29,7 +29,7 @@ class GoHelper extends LangHelper {
 
     dockerfileBuildCmds() {
         const cmds = [];
-        if (fs.existsSync('vendor/') && fs.existsSync('Gopkg.toml')) {
+        if (!fs.existsSync('vendor/') && fs.existsSync('Gopkg.toml')) {
             cmds.push('RUN go get -u github.com/golang/dep/cmd/dep');
             if (fs.existsSync('Gopkg.lock')) {
                 cmds.push('ADD Gopkg.* /go/src/func/');
