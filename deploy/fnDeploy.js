@@ -121,8 +121,9 @@ class FNDeploy {
             this.bumpIt,
             this.localCmd,
             this.buildHelper.bind(this),
-            this.dockerPush,
+            this.dockerPush.bind(this),
             this.routeUpdate,
+            (f) => { this.serverless.cli.log(`${f.appName}${f.path} deployed..`); },
         ];
 
         if (!fs.existsSync(`${cwd}/${dir}`)) {
@@ -138,6 +139,13 @@ class FNDeploy {
 
             if (!(func.name !== '')) {
                 func.name = dir;
+            }
+
+
+            for (let evt = 0; evt < func.events.length; evt++) {
+                if (func.events[evt].http !== undefined) {
+                    func.path = func.events[evt].http.path;
+                }
             }
 
             if (func.path === '' | func.path === undefined || func.path === null) {
@@ -200,7 +208,7 @@ class FNDeploy {
         if (fs.existsSync('Dockerfile')) {
             const cwd = process.cwd();
             func.dockerFile = `${cwd}/Dockerfile`;
-            return this.dockerBuild(func);
+            return this.dockerBuild.bind(this)(func);
         }
 
 
@@ -220,7 +228,7 @@ class FNDeploy {
         func.dockerFile = this.writeTmpDockerFile(func);
         const steps = [
             this.preBuild,
-            this.dockerBuild,
+            this.dockerBuild.bind(this),
             this.postBuild,
         ];
         return BB.mapSeries(steps, (s) => { s(func); })
@@ -292,7 +300,6 @@ class FNDeploy {
             addedEntry = true;
         }
 
-        console.log('Added Entry:', addedEntry);
         if (!addedEntry) {
             const entry = this.stringToSlice(helper.entrypoint());
             dockerFileLines.push(`ENTRYPOINT [${entry}]`);
@@ -342,7 +349,7 @@ class FNDeploy {
         args.push('--build-arg', 'HTTP_PROXY');
         args.push('--build-arg', 'HTTPS_PROXY');
         args.push(func.dir);
-        const res = spawnSync('docker', args, { stdio: 'inherit' });
+        const res = spawnSync('docker', args, { stdio: this.options.v ? 'inherit' : '' });
         if (res.status !== 0) {
             return BB.reject('docker command failed');
         }
@@ -354,8 +361,11 @@ class FNDeploy {
             return BB.resolve('local do not docker push');
         }
         // XXX check valid image name..
-        console.log(`Pushing ${func.imageName} to docker registry....`);
-        const res = spawnSync('docker', ['push', func.imageName], { stdio: 'inherit' });
+        if (this.options.v) {
+            console.log(`Pushing ${func.imageName} to docker registry....`);
+        }
+        const res = spawnSync('docker', ['push', func.imageName],
+            { stdio: this.options.v ? 'inherit' : '' });
         if (res.status !== 0) {
             return BB.reject(`failed to push ${func.imageName}`);
         }
