@@ -1,7 +1,7 @@
 'use strict';
 const BB = require('bluebird');
 const FN = require('fn_js');
-const { fnApiUrl } = require('../utils/util');
+const { fnApiUrl, getFuncPath } = require('../utils/util');
 
 class FNLogs {
     constructor(serverless, options) {
@@ -43,13 +43,18 @@ class FNLogs {
         apiInstance.apiClient.basePath = fnApiUrl();
 
         const app = this.serverless.service.serviceObject.name;
-        const func = this.serverless.service.functions[this.options.f];
-        if (!func.path.startsWith('/')) {
-            func.path = `/${func.path}`;
+        let funParam = this.options.function;
+        if (funParam === undefined) {
+            funParam = this.options.f;
         }
+        if (funParam === undefined || funParam === null || funParam === '') {
+            return BB.reject('No valid function provided please provide' +
+                ' --function or -f to invoke.');
+        }
+        const func = this.serverless.service.functions[funParam];
 
         const opts = {
-            path: func.path,
+            path: getFuncPath(func),
         };
 
         return apiInstance.appsAppCallsGet(app, opts).then((calls) => calls.calls.reverse());

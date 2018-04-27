@@ -1,6 +1,6 @@
 'use strict';
 
-const { fnRouteUrl } = require('../utils/util');
+const { fnRouteUrl, getFuncPath } = require('../utils/util');
 const axios = require('axios');
 const BB = require('bluebird');
 const fs = require('fs');
@@ -45,7 +45,7 @@ class FNInvoke {
         let f = this.serverless.service.functions[funParam];
         if (f === undefined || f === null) {
             for (const func in this.serverless.service.functions) {
-                const path = this.getFuncPath(this.serverless.service.functions[func], func);
+                const path = getFuncPath(this.serverless.service.functions[func], func);
                 if (path.replace('/', '') === funParam.replace('/', '')) {
                     f = this.serverless.service.functions[func];
                     break;
@@ -57,7 +57,7 @@ class FNInvoke {
             }
         }
         let url = fnRouteUrl();
-        const funcpath = this.getFuncPath(f);
+        const funcpath = getFuncPath(f);
 
         url = `${url}/${this.serverless.service.serviceObject.name}/${funcpath}`;
         this.serverless.cli.log(`Calling Function: ${url}`);
@@ -70,20 +70,6 @@ class FNInvoke {
             return axios.post(url, this.options.data);
         }
         return axios.get(url);
-    }
-
-    getFuncPath(func, dir) {
-        let path = dir;
-        for (let evt = 0; evt < func.events.length; evt++) {
-            if (func.events[evt].http !== undefined) {
-                path = func.events[evt].http.path;
-            }
-        }
-        if (path === undefined || path === null || path === '') {
-            path = func.name;
-        }
-
-        return path;
     }
 }
 

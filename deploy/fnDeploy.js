@@ -7,7 +7,7 @@ const semver = require('semver');
 const _ = require('lodash');
 const fs = require('fs');
 const getHelper = require('../langs/helpers.js');
-const { fnApiUrl } = require('../utils/util');
+const { fnApiUrl, getFuncPath } = require('../utils/util');
 
 class FNDeploy {
     constructor(serverless, options) {
@@ -142,15 +142,7 @@ class FNDeploy {
             }
 
 
-            for (let evt = 0; evt < func.events.length; evt++) {
-                if (func.events[evt].http !== undefined) {
-                    func.path = func.events[evt].http.path;
-                }
-            }
-
-            if (func.path === '' | func.path === undefined || func.path === null) {
-                func.path = dir;
-            }
+            func.path = getFuncPath(func, dir);
         }
 
         func.imageName = this.imageName(func);
