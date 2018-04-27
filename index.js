@@ -14,17 +14,11 @@ const FNInvoke = require('./invoke/fnInvoke');
 const FNInfo = require('./info/fnInfo');
 const FNLogs = require('./logs/fnLogs');
 
-const FNLogAllSteps = require('./fnLogAllSteps.js');
-
 class FNIndex {
     constructor(serverless, options) {
         this.serverless = serverless;
         this.options = options;
-
         this.serverless.pluginManager.addPlugin(FNProvider);
-
-        this.serverless.pluginManager.addPlugin(FNLogAllSteps);
-
         this.serverless.pluginManager.addPlugin(FNDeploy);
         this.serverless.pluginManager.addPlugin(FNRemove);
         this.serverless.pluginManager.addPlugin(FNInvoke);
