@@ -13,14 +13,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fnproject/serverless-integration.git"
+    "url": "git+https://github.com/fnproject/serverless-fn.git"
   },
   "author": "james.jeffrey@oracle.com",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/fnproject/serverless-integration/issues"
+    "url": "https://github.com/fnproject/serverless-fn/issues"
   },
-  "homepage": "https://github.com/fnproject/serverless-integration#readme",
+  "homepage": "https://github.com/fnproject/serverless-fn#readme",
   "dependencies": {
     "axios": "^0.18.0",
     "bluebird": "^3.5.1",
