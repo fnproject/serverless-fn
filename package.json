@@ -1,6 +1,6 @@
 {
   "name": "serverless-fn",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "This plugin enables support for FN within the [Serverless Framework](https://github.com/serverless).",
   "main": "index.js",
   "directories": {
