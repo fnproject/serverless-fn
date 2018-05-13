@@ -229,7 +229,7 @@ class FNDeploy {
             this.dockerBuild.bind(this),
             this.postBuild,
         ];
-        return BB.mapSeries(steps, (s) => { s(func); })
+        return BB.mapSeries(steps, (s) => s(func))
             .finally(this.cleanup(func.dockerFile));
     }
 
