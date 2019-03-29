@@ -238,7 +238,7 @@ class FNDeploy {
         if (!fname.includes('/')) {
 		// then we'll prefix FN_REGISTRY
             let reg = process.env.FN_REGISTRY;
-            if (reg !== '') {
+            if (reg && reg !== '') {
                 if (!reg.endsWith('/')) {
                     reg += '/';
                 }
