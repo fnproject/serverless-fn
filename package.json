@@ -22,7 +22,7 @@
   },
   "homepage": "https://github.com/fnproject/serverless-fn#readme",
   "dependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.2",
     "bluebird": "^3.5.1",
     "chalk": "^2.0.1",
     "fn_js": "github:hibooboo2/fn_js",
